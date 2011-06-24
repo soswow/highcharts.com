@@ -297,9 +297,9 @@ function serializeCSS(style) {
 
 }
 /**
- * Set CSS on a give element
+ * Set CSS on a given element
  * @param {Object} el
- * @param {Object} styles
+ * @param {Object} styles Style object with camel case property names
  */
 function css (el, styles) {
 	if (isIE) {
@@ -5478,9 +5478,10 @@ function Chart (options, callback) {
 				max: newMax
 			}, function() { // the default event handler
 
-
 				userSetMin = newMin;
 				userSetMax = newMax;
+
+
 				// redraw
 				if (redraw) {
 					chart.redraw(animation);
@@ -8273,7 +8274,6 @@ function Chart (options, callback) {
 		// Run an event where series and axes can be added
 		fireEvent(chart, 'beforeRender');
 
-
 		chart.render = render;
 
 		// depends on inverted and on margins being set
@@ -9257,7 +9257,6 @@ Series.prototype = {
 	 * needed later in drawPoints, drawGraph and drawTracker.
 	 */
 	translate: function() {
-
 		if (!this.processedXData) { // hidden series
 			this.processData();
 		}
@@ -10603,9 +10602,9 @@ var ColumnSeries = extendClass(Series, {
 			graphic,
 			shapeArgs;
 
+
 		// draw the columns
 		each(series.points, function(point) {
-
 			var plotY = point.plotY;
 			if (plotY !== UNDEFINED && !isNaN(plotY)) {
 				graphic = point.graphic;
