@@ -4932,8 +4932,8 @@ function Chart (options, callback) {
 				}
 
 				// get the bounding box and align the label
-				xs = [path[1], path[4], path[6] || path[1]];
-				ys = [path[2], path[5], path[7] || path[2]];
+				xs = [path[1], path[4], pick(path[6], path[1])];
+				ys = [path[2], path[5], pick(path[7], path[2])];
 				x = mathMin.apply(math, xs);
 				y = mathMin.apply(math, ys);
 
