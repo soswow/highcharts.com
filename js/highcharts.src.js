@@ -856,8 +856,8 @@ defaultLabelOptions = {
 	},*/
 	style: {
 		color: '#666',
-		fontSize: '11px',
-		lineHeight: '14px'
+		'font-size': '11px',
+		'line-height': '14px'
 	}
 };
 
@@ -2454,7 +2454,7 @@ SVGRenderer.prototype = {
 			reverse = isFirefox && textStyles && textStyles.HcDirection === 'rtl' && !this.forExport, // issue #38
 			arr,
 			width = textStyles && pInt(textStyles.width),
-			textLineHeight = textStyles && textStyles.lineHeight,
+			textLineHeight = textStyles && textStyles['line-height'],
 			lastLine,
 			i = childNodes.length;
 
@@ -9847,7 +9847,7 @@ Series.prototype = {
 				// vertically centered
 				if (inverted && !options.y) {
 					dataLabel.attr({
-						y: y + pInt(dataLabel.styles.lineHeight) * 0.9 - dataLabel.getBBox().height / 2
+						y: y + pInt(dataLabel.styles['line-height']) * 0.9 - dataLabel.getBBox().height / 2
 					});
 				}
 
