@@ -241,8 +241,8 @@ extend(Chart.prototype, {
 			each (chart[axisType], function(axis, i) {
 				var axisCopy = chartCopy[axisType][i],
 					extremes = axis.getExtremes(),
-					userMin = extremes.userSetMin,
-					userMax = extremes.userSetMax;
+					userMin = extremes.userMin,
+					userMax = extremes.userMax;
 
 				if (userMin !== UNDEFINED || userMax !== UNDEFINED) {
 					axisCopy.setExtremes(userMin, userMax, true, false);
