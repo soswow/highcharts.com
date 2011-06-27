@@ -405,7 +405,7 @@ function Chart (options, callback) {
 
 					// vertically centered
 					if (!defined(labelOptions.y)) {
-						y += pInt(label.styles['line-height']) * 0.9 - label.elemHeight / 2;
+						y += pInt(label.styles.lineHeight) * 0.9 - label.getBBox().height / 2;
 					}
 
 

@@ -1120,8 +1120,8 @@ defaultLabelOptions = {
 	},*/
 	style: {
 		color: '#666',
-		'font-size': '11px',
-		'line-height': '14px'
+		fontSize: '11px',
+		lineHeight: '14px'
 	}
 };
 
@@ -2038,14 +2038,6 @@ SVGElement.prototype = {
 			camelStyles = styles,
 			n;
 
-		// hyphenate
-		if (defined(styles)) {
-			styles = {};
-			for (n in camelStyles) {
-				styles[hyphenate(n)] = camelStyles[n];
-			}
-		}
-
 		// convert legacy
 		if (styles && styles.color) {
 			styles.fill = styles.color;
@@ -2060,6 +2052,14 @@ SVGElement.prototype = {
 
 		// store object
 		elemWrapper.styles = styles;
+
+		// hyphenate
+		if (defined(styles)) {
+			styles = {};
+			for (n in camelStyles) {
+				styles[hyphenate(n)] = camelStyles[n];
+			}
+		}
 
 		// serialize and set style attribute
 		if (isIE && !hasSVG) { // legacy IE doesn't support setting style attribute
@@ -4872,7 +4872,7 @@ function Chart (options, callback) {
 
 					// vertically centered
 					if (!defined(labelOptions.y)) {
-						y += pInt(label.styles['line-height']) * 0.9 - label.elemHeight / 2;
+						y += pInt(label.styles.lineHeight) * 0.9 - label.getBBox().height / 2;
 					}
 
 
@@ -10130,7 +10130,7 @@ Series.prototype = {
 				// vertically centered
 				if (inverted && !options.y) {
 					dataLabel.attr({
-						y: y + pInt(dataLabel.styles['line-height']) * 0.9 - dataLabel.getBBox().height / 2
+						y: y + pInt(dataLabel.styles.lineHeight) * 0.9 - dataLabel.getBBox().height / 2
 					});
 				}
 
