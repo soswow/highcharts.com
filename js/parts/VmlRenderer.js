@@ -931,6 +931,7 @@ VMLRenderer.prototype = { // inherit SVGRenderer
 			y = x.y;
 			width = x.width;
 			height = x.height;
+			strokeWidth = x.strokeWidth;
 			x = x.x;
 		}
 		var wrapper = this.symbol('rect');

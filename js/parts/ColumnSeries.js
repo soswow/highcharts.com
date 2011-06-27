@@ -37,7 +37,9 @@ var ColumnSeries = extendClass(Series, {
 	translate: function() {
 		var series = this,
 			chart = series.chart,
-			stacking = series.options.stacking,
+			options = series.options,
+			stacking = options.stacking,
+			borderWidth = options.borderWidth,
 			columnCount = 0,
 			xAxis = series.xAxis,
 			reversedXAxis = xAxis.reversed,
@@ -70,8 +72,7 @@ var ColumnSeries = extendClass(Series, {
 		// calculate the width and position of each column based on
 		// the number of column series in the plot, the groupPadding
 		// and the pointPadding options
-		var options = series.options,
-			points = series.points,
+		var points = series.points,
 			//closestPoints = series.closestPoints || 1,
 			categoryWidth = mathAbs(pick(
 				xAxis.leastDistance,
@@ -101,7 +102,8 @@ var ColumnSeries = extendClass(Series, {
 				barY = mathCeil(mathMin(plotY, yBottom)),
 				barH = mathCeil(mathMax(plotY, yBottom) - barY),
 				stack = series.yAxis.stacks[(point.y < 0 ? '-' : '') + series.stackKey],
-				trackerY;
+				trackerY,
+				shapeArgs;
 
 			// Record the offset'ed position and width of the bar to be able to align the stacking total correctly
 			if (stacking && series.visible && stack && stack[point.x]) {
@@ -127,14 +129,22 @@ var ColumnSeries = extendClass(Series, {
 				barH: barH
 			});
 
+			// create shape type and shape args that are reused in drawPoints and drawTracker
 			point.shapeType = 'rect';
-			point.shapeArgs = {
-				x: barX,
-				y: barY,
-				width: pointWidth,
-				height: barH,
+			shapeArgs = extend(chart.renderer.Element.prototype.crisp.apply({}, [
+				borderWidth,
+				barX,
+				barY,
+				pointWidth,
+				barH
+			]), {
 				r: options.borderRadius
-			};
+			});
+			if (borderWidth % 2) { // correct for shorting in crisp method, visible in stacked columns with 1px border
+				shapeArgs.y -= 1;
+				shapeArgs.height += 1;
+			}
+			point.shapeArgs = shapeArgs;
 
 			// make small columns responsive to mouse
 			point.trackerArgs = defined(trackerY) && merge(point.shapeArgs, {
@@ -204,6 +214,7 @@ var ColumnSeries = extendClass(Series, {
 		each(series.points, function(point) {
 			tracker = point.tracker;
 			shapeArgs = point.trackerArgs || point.shapeArgs;
+			delete shapeArgs.strokeWidth;
 			if (point.y !== null) {
 				if (tracker) {// update
 					tracker.attr(shapeArgs);
@@ -259,7 +270,8 @@ var ColumnSeries = extendClass(Series, {
 			 */
 
 			each(points, function(point) {
-				var graphic = point.graphic;
+				var graphic = point.graphic,
+					shapeArgs = point.shapeArgs;
 
 				if (graphic) {
 					// start values
@@ -270,8 +282,8 @@ var ColumnSeries = extendClass(Series, {
 
 					// animate
 					graphic.animate({
-						height: point.barH,
-						y: point.barY
+						height: shapeArgs.height,
+						y: shapeArgs.y
 					}, series.options.animation);
 				}
 			});

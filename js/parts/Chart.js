@@ -2732,7 +2732,9 @@ function Chart (options, callback) {
 				radius,
 				li = item.legendItem,
 				series = item.series || item,
-				i = allItems.length;
+				i = allItems.length,
+				itemOptions = series.options,
+				strokeWidth = (itemOptions && itemOptions.borderWidth) || 0;
 
 
 			if (!li) { // generate it once, later move it
@@ -2772,14 +2774,13 @@ function Chart (options, callback) {
 					.add(legendGroup);
 
 				// draw the line
-				if (!simpleSymbol && item.options && item.options.lineWidth) {
-					var itemOptions = item.options;
-						attribs = {
+				if (!simpleSymbol && itemOptions && itemOptions.lineWidth) {
+					var attrs = {
 							'stroke-width': itemOptions.lineWidth,
 							zIndex: 2
 						};
 					if (itemOptions.dashStyle) {
-						attribs.dashstyle = itemOptions.dashStyle;
+						attrs.dashstyle = itemOptions.dashStyle;
 					}
 					item.legendLine = renderer.path([
 						M,
@@ -2789,13 +2790,13 @@ function Chart (options, callback) {
 						-symbolPadding,
 						0
 					])
-					.attr(attribs)
+					.attr(attrs)
 					.add(legendGroup);
 				}
 
 				// draw a simple symbol
 				if (simpleSymbol) { // bar|pie|area|column
-					//legendLayer.drawRect(
+
 					legendSymbol = renderer.rect(
 						(symbolX = -symbolWidth - symbolPadding),
 						(symbolY = -11),
@@ -2803,14 +2804,14 @@ function Chart (options, callback) {
 						12,
 						2
 					).attr({
-						'stroke-width': 0,
+						//'stroke-width': 0,
 						zIndex: 3
 					}).add(legendGroup);
 				}
 
 				// draw the marker
-				else if (item.options && item.options.marker && item.options.marker.enabled) {
-					radius = item.options.marker.radius;
+				else if (itemOptions && itemOptions.marker && itemOptions.marker.enabled) {
+					radius = itemOptions.marker.radius;
 					legendSymbol = renderer.symbol(
 						item.symbol,
 						(symbolX = -symbolWidth / 2 - symbolPadding - radius),
@@ -2824,8 +2825,8 @@ function Chart (options, callback) {
 
 				}
 				if (legendSymbol) {
-					legendSymbol.xOff = symbolX;
-					legendSymbol.yOff = symbolY;
+					legendSymbol.xOff = symbolX + (strokeWidth % 2 / 2);
+					legendSymbol.yOff = symbolY + (strokeWidth % 2 / 2);
 				}
 
 				item.legendSymbol = legendSymbol;
@@ -2835,7 +2836,7 @@ function Chart (options, callback) {
 
 
 				// add the HTML checkbox on top
-				if (item.options && item.options.showCheckbox) {
+				if (itemOptions && itemOptions.showCheckbox) {
 					item.checkbox = createElement('input', {
 						type: 'checkbox',
 						checked: item.selected,
