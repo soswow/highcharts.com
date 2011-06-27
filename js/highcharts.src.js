@@ -291,7 +291,7 @@ function serializeCSS(style) {
 		key;
 	// serialize the declaration
 	for (key in style) {
-		s += hyphenate(key) +':'+ style[key] + ';';
+		s += key +':'+ style[key] + ';';
 	}
 	return s;
 
@@ -1978,7 +1978,18 @@ SVGElement.prototype = {
 	css: function(styles) {
 		var elemWrapper = this,
 			elem = elemWrapper.element,
-			textWidth = styles && styles.width && elem.nodeName === 'text';
+			textWidth = styles && styles.width && elem.nodeName === 'text',
+
+			camelStyles = styles,
+			n;
+
+		// hyphenate
+		if (defined(styles)) {
+			styles = {};
+			for (n in camelStyles) {
+				styles[hyphenate(n)] = camelStyles[n];
+			}
+		}
 
 		// convert legacy
 		if (styles && styles.color) {
@@ -4756,7 +4767,7 @@ function Chart (options, callback) {
 
 					// vertically centered
 					if (!defined(labelOptions.y)) {
-						y += pInt(label.styles.lineHeight) * 0.9 - label.elemHeight / 2;
+						y += pInt(label.styles['line-height']) * 0.9 - label.elemHeight / 2;
 					}
 
 
