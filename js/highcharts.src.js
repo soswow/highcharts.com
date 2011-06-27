@@ -3607,6 +3607,7 @@ var VMLElement = extendClass( SVGElement, {
 
 					// text for rotated and non-rotated elements
 					else if (key === 'text') {
+						this.bBox = null;
 						element.innerHTML = value;
 						skipAttr = true;
 					}
