@@ -1473,6 +1473,10 @@ Series.prototype = {
 
 				// update existing label
 				if (dataLabel) {
+					// vertically centered
+					if (inverted && !options.y) {
+						y = y + pInt(dataLabel.styles.lineHeight) * 0.9 - dataLabel.getBBox().height / 2;
+					}
 					dataLabel
 						.attr({
 							text: str
@@ -1494,13 +1498,12 @@ Series.prototype = {
 					})
 					.css(options.style)
 					.add(dataLabelsGroup);
-				}
-
-				// vertically centered
-				if (inverted && !options.y) {
-					dataLabel.attr({
-						y: y + pInt(dataLabel.styles.lineHeight) * 0.9 - dataLabel.getBBox().height / 2
-					});
+					// vertically centered
+					if (inverted && !options.y) {
+						dataLabel.attr({
+							y: y + pInt(dataLabel.styles.lineHeight) * 0.9 - dataLabel.getBBox().height / 2
+						});
+					}
 				}
 
 				if (isBarLike && series.options.stacking) {
