@@ -6192,17 +6192,7 @@ function Chart (options, callback) {
 				pointConfig = [],
 				tooltipPos = point.tooltipPos,
 				formatter = options.formatter || defaultFormatter,
-				hoverPoints = chart.hoverPoints,
-				getConfig = function(point) {
-					return {
-						series: point.series,
-						point: point,
-						x: point.category,
-						y: point.y,
-						percentage: point.percentage,
-						total: point.total || point.stackTotal
-					};
-				};
+				hoverPoints = chart.hoverPoints;
 
 			// shared tooltip, array is sent over
 			if (shared && !(point.series && point.series.noSharedTooltip)) {
@@ -6220,7 +6210,7 @@ function Chart (options, callback) {
 					item.setState(HOVER_STATE);
 					plotY += item.plotY; // for average
 
-					pointConfig.push(getConfig(item));
+					pointConfig.push(item.getLabelConfig());
 				});
 
 				plotX = point[0].plotX;
@@ -6234,7 +6224,7 @@ function Chart (options, callback) {
 
 			// single point tooltip
 			} else {
-				textConfig = getConfig(point);
+				textConfig = point.getLabelConfig();
 			}
 			text = formatter.call(textConfig);
 
@@ -8556,6 +8546,21 @@ Point.prototype = {
 	},
 
 	/**
+	 * Return the configuration hash needed for the data label and tooltip formatters
+	 */
+	getLabelConfig: function() {
+		var point = this;
+		return {
+			x: point.x,
+			y: point.y,
+			series: point.series,
+			point: point,
+			percentage: point.percentage,
+			total: point.total || point.stackTotal
+		};
+	},
+
+	/**
 	 * Toggle the selection status of a point
 	 * @param {Boolean} selected Whether to select or unselect the point.
 	 * @param {Boolean} accumulate Whether to add to the previous selection. By default,
@@ -8636,23 +8641,6 @@ Point.prototype = {
 	},
 
 	/**
-	 * Get the formatted text for this point's data label
-	 *
-	 * @return {String} The formatted data label pseudo-HTML
-	 */
-	getDataLabelText: function() {
-		var point = this;
-		return this.series.options.dataLabels.formatter.call({
-			x: point.x,
-			y: point.y,
-			series: point.series,
-			point: point,
-			percentage: point.percentage,
-			total: point.total || point.stackTotal
-		});
-	},
-
-	/**
 	 * Update the point with new options (typically x/y data) and optionally redraw the series.
 	 *
 	 * @param {Object} options Point options as defined in the series.data array
@@ -8677,13 +8665,6 @@ Point.prototype = {
 		point.firePointEvent('update', { options: options }, function() {
 
 			point.applyOptions(options);
-
-			// update data label
-			if (dataLabel) {
-				dataLabel.attr({
-					text: point.getDataLabelText()
-				});
-			}
 
 			// update visuals
 			if (isObject(options)) {
@@ -9868,7 +9849,7 @@ Series.prototype = {
 					align = options.align;
 
 				// get the string
-				str = point.getDataLabelText();
+				str = options.formatter.call(point.getLabelConfig());
 				x = (inverted ? chart.plotWidth - plotY : plotX) + options.x;
 				y = (inverted ? chart.plotHeight - plotX : plotY) + options.y;
 
@@ -9878,11 +9859,16 @@ Series.prototype = {
 				}
 
 
+				// update existing label
 				if (dataLabel) {
-					dataLabel.animate({
-						x: x,
-						y: y
-					});
+					dataLabel
+						.attr({
+							text: str
+						}).animate({
+							x: x,
+							y: y
+						});
+				// create new label
 				} else if (defined(str)) {
 					dataLabel = point.dataLabel = chart.renderer.text(
 						str,
