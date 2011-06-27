@@ -241,7 +241,7 @@ function Chart (options, callback) {
 					isFirst = pos === tickPositions[0],
 					isLast = pos === tickPositions[tickPositions.length - 1],
 					withLabel = !((isFirst && !pick(options.showFirstLabel, 1)) ||
-						(isLast && !pick(options.showLastLabel, !!categories))), // dft true for cat, false for non-cat
+						(isLast && !pick(options.showLastLabel, 0))),
 					width = (categories && horiz && categories.length &&
 						!labelOptions.step && !labelOptions.staggerLines &&
 						!labelOptions.rotation &&
@@ -254,8 +254,8 @@ function Chart (options, callback) {
 
 				// get the string
 				str = labelFormatter.call({
-						isFirst: pos === tickPositions[0],
-						isLast: pos === tickPositions[tickPositions.length - 1],
+						isFirst: isFirst,
+						isLast: isLast,
 						dateTimeLabelFormat: dateTimeLabelFormat,
 						value: isLog ? lin2log(value) : value
 					});
