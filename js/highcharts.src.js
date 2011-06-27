@@ -418,7 +418,7 @@ dateFormat = function (format, timestamp, capitalize) {
 		langWeekdays = lang.weekdays,
 		langMonths = lang.months,
 		/* // uncomment this and the 'W' format key below to enable week numbers
-		weekNumber = function() { 
+		weekNumber = function() {
 			var clone = new Date(date.valueOf()),
 				day = clone[getDay]() == 0 ? 7 : clone[getDay](),
 				dayNumber;
@@ -4670,7 +4670,7 @@ function Chart (options, callback) {
 						isFirst: pos === tickPositions[0],
 						isLast: pos === tickPositions[tickPositions.length - 1],
 						dateTimeLabelFormat: dateTimeLabelFormat,
-						value: (categories && categories[pos] ? categories[pos] : pos)
+						value: (categories && defined(categories[pos]) ? categories[pos] : pos)
 					});
 
 
