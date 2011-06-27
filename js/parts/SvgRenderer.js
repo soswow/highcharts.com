@@ -723,6 +723,9 @@ var SVGRenderer = function() {
 	this.init.apply(this, arguments);
 };
 SVGRenderer.prototype = {
+
+	Element: SVGElement,
+
 	/**
 	 * Initialize the SVGRenderer
 	 * @param {Object} container
@@ -735,7 +738,6 @@ SVGRenderer.prototype = {
 			loc = location,
 			boxWrapper;
 
-		renderer.Element = SVGElement;
 		boxWrapper = renderer.createElement('svg')
 			.attr({
 				xmlns: SVG_NS,

@@ -2428,6 +2428,9 @@ var SVGRenderer = function() {
 	this.init.apply(this, arguments);
 };
 SVGRenderer.prototype = {
+
+	Element: SVGElement,
+
 	/**
 	 * Initialize the SVGRenderer
 	 * @param {Object} container
@@ -2440,7 +2443,6 @@ SVGRenderer.prototype = {
 			loc = location,
 			boxWrapper;
 
-		renderer.Element = SVGElement;
 		boxWrapper = renderer.createElement('svg')
 			.attr({
 				xmlns: SVG_NS,
@@ -3942,6 +3944,7 @@ VMLRenderer = function() {
 };
 VMLRenderer.prototype = { // inherit SVGRenderer
 
+	Element: VMLElement,
 	isIE8: userAgent.indexOf('MSIE 8.0') > -1,
 
 
@@ -3955,7 +3958,6 @@ VMLRenderer.prototype = { // inherit SVGRenderer
 		var renderer = this,
 			boxWrapper;
 
-		renderer.Element = VMLElement;
 		renderer.alignedObjects = [];
 
 		boxWrapper = renderer.createElement(DIV);
