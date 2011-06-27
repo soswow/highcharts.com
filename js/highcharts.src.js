@@ -5294,7 +5294,11 @@ function Chart (options, callback) {
 				linkedParentExtremes,
 				tickIntervalOption = options.tickInterval,
 				tickPixelIntervalOption = options.tickPixelInterval,
-				maxZoom = options.maxZoom,
+				maxZoom = options.maxZoom || (
+					isXAxis && !defined(options.min) && !defined(options.max) ?
+						mathMin(chart.smallestInterval * 5, dataMax - dataMin) :
+						null
+				),
 				zoomOffset;
 
 			axisLength = horiz ? axisWidth : axisHeight;
