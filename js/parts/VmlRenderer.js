@@ -1103,7 +1103,11 @@ for (forNSvgRenderer in SVGRenderer.prototype) {
 		VMLRenderer.prototype[n] = SVGRenderer.prototype[n];
 	}
 }
+
+	// general renderer
+	Renderer = VMLRenderer;
 }
+
 /* ****************************************************************************
  *                                                                            *
  * END OF INTERNET EXPLORER <= 8 SPECIFIC CODE                                *

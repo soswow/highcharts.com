@@ -39,6 +39,7 @@ var doc = document,
 	//hasSVG = win.SVGAngle || doc.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1"),
 	hasSVG = !!doc.createElementNS && !!doc.createElementNS("http://www.w3.org/2000/svg", "svg").createSVGRect,
 	SVG_NS = 'http://www.w3.org/2000/svg',
+	Renderer,
 	hasTouch = doc.documentElement.ontouchstart !== undefined,
 	colorCounter,
 	symbolCounter,
@@ -3306,7 +3307,8 @@ SVGRenderer.prototype = {
 }; // end SVGRenderer
 
 
-
+// general renderer
+Renderer = SVGRenderer;
 
 /* ****************************************************************************
  *                                                                            *
@@ -4411,18 +4413,16 @@ for (forNSvgRenderer in SVGRenderer.prototype) {
 		VMLRenderer.prototype[n] = SVGRenderer.prototype[n];
 	}
 }
+
+	// general renderer
+	Renderer = VMLRenderer;
 }
+
 /* ****************************************************************************
  *                                                                            *
  * END OF INTERNET EXPLORER <= 8 SPECIFIC CODE                                *
  *                                                                            *
  *****************************************************************************/
-
-/**
- * General renderer
- */
-var Renderer = hasSVG ?	SVGRenderer : VMLRenderer;
-
 
 /**
  * The chart class
