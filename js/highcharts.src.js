@@ -1972,7 +1972,7 @@ SVGElement.prototype = {
 	symbolAttr: function(hash) {
 		var wrapper = this;
 
-		each (['x', 'y', 'r', 'start', 'end', 'width', 'height', 'innerR', 'anchorX', 'anchorY'], function(key) {
+		each(['x', 'y', 'r', 'start', 'end', 'width', 'height', 'innerR', 'anchorX', 'anchorY'], function(key) {
 			wrapper[key] = pick(hash[key], wrapper[key]);
 		});
 
@@ -6343,7 +6343,7 @@ function Chart (options, callback) {
 
 				// hide previous hoverPoints and set new
 				if (hoverPoints) {
-					each (hoverPoints, function(point) {
+					each(hoverPoints, function(point) {
 						point.setState();
 					});
 				}
@@ -6382,7 +6382,7 @@ function Chart (options, callback) {
 
 				// hide previous hoverPoints and set new
 				if (hoverPoints) {
-					each (hoverPoints, function(point) {
+					each(hoverPoints, function(point) {
 						point.setState();
 					});
 				}
