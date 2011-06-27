@@ -2951,7 +2951,7 @@ SVGRenderer.prototype = {
 		// image symbols
 		} else if (imageRegex.test(symbol)) {
 
-			function centerImage(img, size) {
+			var centerImage = function(img, size) {
 				img.attr({
 					width: size[0],
 					height: size[1]
@@ -2959,7 +2959,7 @@ SVGRenderer.prototype = {
 					-mathRound(size[0] / 2),
 					-mathRound(size[1] / 2)
 				);
-			}
+			};
 
 			imageSrc = symbol.match(imageRegex)[1];
 			imageSize = symbolSizes[imageSrc];
@@ -5155,7 +5155,7 @@ function Chart (options, callback) {
 			/**
 			 * Sets the offset that the stack has from the x value and repositions the label.
 			 */
-			setOffset: function (xOffset, xWidth) {
+			setOffset: function(xOffset, xWidth) {
 				var stackItem = this,										// aliased this
 					neg = stackItem.isNegative,								// special treatment is needed for negative stacks
 					y = axis.translate(stackItem.total),					// stack value translated mapped to chart coordinates

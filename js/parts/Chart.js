@@ -685,7 +685,7 @@ function Chart (options, callback) {
 			/**
 			 * Sets the offset that the stack has from the x value and repositions the label.
 			 */
-			setOffset: function (xOffset, xWidth) {
+			setOffset: function(xOffset, xWidth) {
 				var stackItem = this,										// aliased this
 					neg = stackItem.isNegative,								// special treatment is needed for negative stacks
 					y = axis.translate(stackItem.total),					// stack value translated mapped to chart coordinates

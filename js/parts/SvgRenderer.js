@@ -1226,7 +1226,7 @@ SVGRenderer.prototype = {
 		// image symbols
 		} else if (imageRegex.test(symbol)) {
 
-			function centerImage(img, size) {
+			var centerImage = function(img, size) {
 				img.attr({
 					width: size[0],
 					height: size[1]
@@ -1234,7 +1234,7 @@ SVGRenderer.prototype = {
 					-mathRound(size[0] / 2),
 					-mathRound(size[1] / 2)
 				);
-			}
+			};
 
 			imageSrc = symbol.match(imageRegex)[1];
 			imageSize = symbolSizes[imageSrc];
