@@ -3934,11 +3934,17 @@ function Chart (options, callback) {
 		var onreadystatechange = 'onreadystatechange';
 		if (!hasSVG && win == win.top && doc.readyState !== 'complete') {
 			doc.attachEvent(onreadystatechange, function() {
-				doc.detachEvent(onreadystatechange, firstRender);
-				firstRender();
+				if (doc.readyState === 'complete') {
+					doc.detachEvent(onreadystatechange, firstRender);
+					firstRender();
+				}
 			});
 			return;
 		}
+
+		// Set to zero for each new chart
+		colorCounter = 0;
+		symbolCounter = 0;
 
 		// create the container
 		getContainer();
@@ -3986,11 +3992,6 @@ function Chart (options, callback) {
 
 	// Run chart
 
-
-
-	// Set to zero for each new chart
-	colorCounter = 0;
-	symbolCounter = 0;
 
 	// Destroy the chart and free up memory.
 	addEvent(win, 'unload', destroy);
