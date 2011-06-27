@@ -1457,7 +1457,23 @@ var defaultXAxisOptions =  {
 		//x: 0,
 		//y: 0
 	},
-	type: 'linear' // linear, logarithmic or datetime // docs
+	type: 'linear', // linear, logarithmic or datetime // docs
+	stackLabels: { // docs
+		enabled: false,
+		//align: dynamic,
+		//y: dynamic,
+		//x: dynamic,
+		//verticalAlign: dynamic
+		//textAlign: dynamic
+		formatter: function() {
+			return this.total;
+		},
+		style: {
+			color: '#666',
+			'font-size': '11px',
+			'line-height': '14px'
+		}
+	}
 },
 
 defaultYAxisOptions = merge(defaultXAxisOptions, {
@@ -5076,6 +5092,91 @@ function Chart (options, callback) {
 		}
 		};
 
+		/**
+		 * The class for stack items
+		 */
+		function StackItem(options, isNegative, x) {
+			var stackItem = this;
+
+			// Tells if the stack is negative
+			stackItem.isNegative = isNegative;
+
+			// Save the options to be able to style the label
+			stackItem.options = options;
+
+			// Save the x value to be able to position the label later
+			stackItem.x = x;
+
+			// The align options and text align varies on whether the stack is negative and
+			// if the chart is inverted or not.
+			// First test the user supplied value, then use the dynamic.
+			stackItem.alignOptions = {
+				align: options.align || (inverted ? (isNegative ? 'left' : 'right') : 'center'),
+				verticalAlign: options.verticalAlign || (inverted ? 'middle' : (isNegative ? 'bottom' : 'top')),
+				y: pick(options.y, inverted ? 4 : (isNegative ? 14 : -6)),
+				x: pick(options.x, inverted ? (isNegative ? -6 : 6) : 0)
+			};
+
+			stackItem.textAlign = options.textAlign || (inverted ? (isNegative ? 'right' : 'left') : 'center');
+		}
+
+		StackItem.prototype = {
+			/**
+			 * Sets the total of this stack. Should be called when a serie is hidden or shown
+			 * since that will affect the total of other stacks.
+			 */
+			setTotal: function(total) {
+				this.total = total;
+				this.cum = total;
+			},
+
+			/**
+			 * Renders the stack total label and adds it to the stack label group.
+			 */
+			render: function(group) {
+				var stackItem = this,									// aliased this
+					str = stackItem.options.formatter.call(stackItem);  // format the text in the label
+
+				// Change the text to reflect the new total and set visibility to hidden in case the serie is hidden
+				if (stackItem.label) {
+					stackItem.label.attr({text: str, visibility: HIDDEN});
+				// Create new label
+				} else {
+					stackItem.label =
+						chart.renderer.text(str, 0, 0)				// dummy positions, actual position updated with setOffset method in columnseries
+							.css(stackItem.options.style)			// apply style
+							.attr({align: stackItem.textAlign,			// fix the text-anchor
+								rotation: stackItem.options.rotation,	// rotation
+								visibility: HIDDEN })					// hidden until setOffset is called
+							.add(group);							// add to the labels-group
+				}
+			},
+
+			/**
+			 * Sets the offset that the stack has from the x value and repositions the label.
+			 */
+			setOffset: function (xOffset, xWidth) {
+				var stackItem = this,										// aliased this
+					neg = stackItem.isNegative,								// special treatment is needed for negative stacks
+					y = axis.translate(stackItem.total),					// stack value translated mapped to chart coordinates
+					yZero = axis.translate(0),								// stack origin
+					h = mathAbs(y - yZero),									// stack height
+					x = chart.xAxis[0].translate(stackItem.x) + xOffset,	// stack x position
+					plotHeight = chart.plotHeight,
+					stackBox = {	// this is the box for the complete stack
+							x: inverted ? (neg ? y : y - h) : x,
+							y: inverted ? plotHeight - x - xWidth : (neg ? (plotHeight - y - h) : plotHeight - y),
+							width: inverted ? h : xWidth,
+							height: inverted ? xWidth : h
+					};
+
+				if (stackItem.label) {
+					stackItem.label
+						.align(stackItem.alignOptions, null, stackBox)	// align the label to the box
+						.attr({visibility: VISIBLE});					// set visibility
+				}
+			}
+		};
 
 		/**
 		 * Get the minimum and maximum for the series of each axis
@@ -5207,10 +5308,14 @@ function Chart (options, callback) {
 										if (!stacks[key]) {
 											stacks[key] = {};
 										}
-										stacks[key][x] = {
-											total: y,
-											cum: y
-										};
+
+										// If the StackItem is there, just update the values,
+										// if not, create one first
+										if (!stacks[key][x]) {
+											stacks[key][x] = new StackItem(options.stackLabels, isNegative, x);
+										}
+										stacks[key][x].setTotal(totalPos);
+
 									}
 
 									j = y.length;
@@ -5787,6 +5892,7 @@ function Chart (options, callback) {
 		 */
 		function render() {
 			var axisTitleOptions = options.title,
+				stackLabelOptions = options.stackLabels,
 				alternateGridColor = options.alternateGridColor,
 				lineWidth = options.lineWidth,
 				lineLeft,
@@ -5944,6 +6050,33 @@ function Chart (options, callback) {
 				});
 
 			}
+
+			// Stacked totals:
+			if (stackLabelOptions && stackLabelOptions.enabled) {
+				var stackKey, oneStack, stackCategory,
+					stackTotalGroup = axis.stackTotalGroup;
+
+				// Create a separate group for the stack total labels
+				if (!stackTotalGroup) {
+					axis.stackTotalGroup = stackTotalGroup =
+						renderer.g('stack-labels')
+							.attr({
+								visibility: VISIBLE,
+								zIndex: 6
+							})
+							.translate(plotLeft, plotTop)
+							.add();
+				}
+
+				// Render each stack total
+				for (stackKey in stacks) {
+					oneStack = stacks[stackKey];
+					for (stackCategory in oneStack) {
+						oneStack[stackCategory].render(stackTotalGroup);
+					}
+				}
+			}
+			// End stacked totals
 
 			axis.isDirty = false;
 		}
@@ -10669,6 +10802,7 @@ var ColumnSeries = extendClass(Series, {
 	translate: function() {
 		var series = this,
 			chart = series.chart,
+			stacking = series.options.stacking,
 			columnCount = 0,
 			xAxis = series.xAxis,
 			reversedXAxis = xAxis.reversed,
@@ -10731,7 +10865,13 @@ var ColumnSeries = extendClass(Series, {
 				barX = point.plotX + pointXOffset,
 				barY = mathCeil(mathMin(plotY, yBottom)),
 				barH = mathCeil(mathMax(plotY, yBottom) - barY),
+				stack = series.yAxis.stacks[(point.y < 0 ? '-' : '') + series.stackKey],
 				trackerY;
+
+			// Record the offset'ed position and width of the bar to be able to align the stacking total correctly
+			if (stacking && series.visible && stack && stack[point.x]) {
+				stack[point.x].setOffset(pointXOffset, pointWidth);
+			}
 
 			// handle options.minPointLength and tracker for small points
 			if (mathAbs(barH) < minPointLength) {

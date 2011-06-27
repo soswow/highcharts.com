@@ -37,6 +37,7 @@ var ColumnSeries = extendClass(Series, {
 	translate: function() {
 		var series = this,
 			chart = series.chart,
+			stacking = series.options.stacking,
 			columnCount = 0,
 			xAxis = series.xAxis,
 			reversedXAxis = xAxis.reversed,
@@ -99,7 +100,13 @@ var ColumnSeries = extendClass(Series, {
 				barX = point.plotX + pointXOffset,
 				barY = mathCeil(mathMin(plotY, yBottom)),
 				barH = mathCeil(mathMax(plotY, yBottom) - barY),
+				stack = series.yAxis.stacks[(point.y < 0 ? '-' : '') + series.stackKey],
 				trackerY;
+
+			// Record the offset'ed position and width of the bar to be able to align the stacking total correctly
+			if (stacking && series.visible && stack && stack[point.x]) {
+				stack[point.x].setOffset(pointXOffset, pointWidth);
+			}
 
 			// handle options.minPointLength and tracker for small points
 			if (mathAbs(barH) < minPointLength) {
