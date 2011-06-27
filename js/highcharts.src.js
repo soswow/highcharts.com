@@ -2420,6 +2420,7 @@ SVGElement.prototype = {
 	}
 };
 
+
 /**
  * The default SVG renderer
  */
