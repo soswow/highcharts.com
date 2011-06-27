@@ -9050,6 +9050,7 @@ Series.prototype = {
 				dataOptions.shift();
 			}
 		}
+		series.getAttribs();
 
 		// redraw
 		series.isDirty = true;
