@@ -2516,7 +2516,7 @@ SVGRenderer.prototype = {
 						if (lineNo) {
 							// Webkit and opera sometimes return 'normal' as the line height. In that
 							// case, webkit uses offsetHeight, while Opera falls back to 18
-							lineHeight = pInt(window.getComputedStyle(lastLine, null).getPropertyValue('line-height'));
+							lineHeight = pInt(win.getComputedStyle(lastLine, null).getPropertyValue('line-height'));
 							if (isNaN(lineHeight)) {
 								lineHeight = textLineHeight || lastLine.offsetHeight || 18;
 							}
@@ -8964,8 +8964,8 @@ Series.prototype = {
 		itemOptions.data = null; // remove from merge to prevent looping over the data set
 
 		options = merge(
-			plotOptions[this.type],
 			plotOptions.series,
+			plotOptions[this.type],
 			itemOptions
 		);
 		options.data = data;
