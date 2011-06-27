@@ -10556,7 +10556,7 @@ var ColumnSeries = extendClass(Series, {
 		// This is called on every series. Consider moving this logic to a
 		// chart.orderStacks() function and call it on init, addSeries and removeSeries
 		each(chart.series, function(otherSeries) {
-			if (otherSeries.type === series.type &&
+			if (otherSeries.type === series.type && otherSeries.visible &&
 					series.options.group === otherSeries.options.group) { // used in Stock charts navigator series
 				if (otherSeries.options.stacking) {
 					stackKey = otherSeries.stackKey;
@@ -10564,7 +10564,7 @@ var ColumnSeries = extendClass(Series, {
 						stackGroups[stackKey] = columnCount++;
 					}
 					columnIndex = stackGroups[stackKey];
-				} else if (otherSeries.visible){
+				} else {
 					columnIndex = columnCount++;
 				}
 				otherSeries.columnIndex = columnIndex;
