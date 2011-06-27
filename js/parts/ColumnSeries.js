@@ -75,7 +75,7 @@ var ColumnSeries = extendClass(Series, {
 			//closestPoints = series.closestPoints || 1,
 			categoryWidth = mathAbs(pick(
 				xAxis.leastDistance,
-				chart.plotSizeX / (categories ? categories.length : 1)
+				chart.plotSizeX / ((categories && categories.length) || 1)
 			)),
 			groupPadding = categoryWidth * options.groupPadding,
 			groupWidth = categoryWidth - 2 * groupPadding,
