@@ -1977,7 +1977,7 @@ SVGElement.prototype = {
 		});
 
 		wrapper.attr({
-			d: wrapper.renderer.symbols[wrapper.symbolName](wrapper.x, wrapper.y, wrapper.width, wrapper.height, wrapper)
+			d: wrapper.renderer.symbols[wrapper.symbolName](mathRound(wrapper.x), mathRound(wrapper.y), wrapper.r, {
 		});
 	},
 
@@ -2920,8 +2920,8 @@ SVGRenderer.prototype = {
 
 			// check if there's a path defined for this symbol
 			path = symbolFn && symbolFn(
-				x,
-				y,
+				mathRound(x),
+				mathRound(y),
 				width,
 				height,
 				options
