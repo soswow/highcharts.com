@@ -7905,9 +7905,9 @@ function Chart (options, callback) {
 				containerHeight = height;
 			}
 		}
-		addEvent(window, 'resize', reflow);
+		addEvent(win, 'resize', reflow);
 		addEvent(chart, 'destroy', function() {
-			removeEvent(window, 'resize', reflow);
+			removeEvent(win, 'resize', reflow);
 		});
 	}
 
@@ -8970,8 +8970,8 @@ Series.prototype = {
 		itemOptions.data = null; // remove from merge to prevent looping over the data set
 
 		options = merge(
-			plotOptions.series,
 			plotOptions[this.type],
+			plotOptions.series,
 			itemOptions
 		);
 		options.data = data;
