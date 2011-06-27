@@ -4135,7 +4135,7 @@ VMLRenderer.prototype = { // inherit SVGRenderer
 	 * @param {Number} r
 	 */
 	circle: function(x, y, r) {
-		return this.path(this.symbols.circle(x, y, r));
+		return this.symbol('circle').attr({ x: x, y: y, r: r});
 	},
 
 	/**
