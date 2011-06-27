@@ -1848,7 +1848,7 @@ SVGElement.prototype = {
 					} else if (key === 'dashstyle') {
 						key = 'stroke-dasharray';
 						value = value && value.toLowerCase();
-						if (value == 'solid') {
+						if (value === 'solid') {
 							value = NONE;
 						} else if (value) {
 							value = value
@@ -1916,7 +1916,7 @@ SVGElement.prototype = {
 					}
 
 					// validate heights
-					if ((key == 'width' || key == 'height') && nodeName == 'rect' && value < 0) {
+					if ((key === 'width' || key === 'height') && nodeName === 'rect' && value < 0) {
 						value = 0;
 					}
 
@@ -2556,7 +2556,7 @@ SVGRenderer.prototype = {
 							// allow getting the right offset height in exporting in IE
 							if (!hasSVG && wrapper.renderer.forExport) {
 								css(tspan, { display: 'block' });
-							};
+							}
 
 							// Webkit and opera sometimes return 'normal' as the line height. In that
 							// case, webkit uses offsetHeight, while Opera falls back to 18
@@ -3720,7 +3720,7 @@ var VMLElement = extendClass( SVGElement, {
 		// faking getBBox in exported SVG in legacy IE
 		if (!bBox) {
 			// faking getBBox in exported SVG in legacy IE
-			if (element.nodeName == 'text') {
+			if (element.nodeName === 'text') {
 				element.style.position = ABSOLUTE;
 			}
 
@@ -3916,8 +3916,8 @@ var VMLElement = extendClass( SVGElement, {
 				if (group) {
 					group.element.appendChild(shadow);
 				} else {
-				}
 					element.parentNode.insertBefore(shadow, element);
+				}
 
 				// record it
 				shadows.push(shadow);
@@ -4540,8 +4540,8 @@ function Chart (options, callback) {
 
 		var axis = this,
 			type = options.type,
-			isDatetimeAxis = type == 'datetime',
-			isLog = type == 'logarithmic',
+			isDatetimeAxis = type === 'datetime',
+			isLog = type === 'logarithmic',
 			offset = options.offset || 0,
 			xOrY = isXAxis ? 'x' : 'y',
 			axisLength,
@@ -6402,7 +6402,7 @@ function Chart (options, callback) {
 			}
 
 			// iOS
-			var ePos = e.touches ? e.touches.item(0) : e;
+			ePos = e.touches ? e.touches.item(0) : e;
 
 			// in certain cases, get mouse position
 			if (e.type !== 'mousemove' || win.opera || pageZoomFix) { // only Opera needs position on mouse move, see below
