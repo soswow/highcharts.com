@@ -1566,6 +1566,10 @@ defaultPlotOptions.column = merge(defaultSeriesOptions, {
 			shadow: false
 		}
 	},
+	dataLabels: {
+		y: null,
+		verticalAlign: null
+	},
 	threshold: 0
 });
 defaultPlotOptions.bar = merge(defaultPlotOptions.column, {
@@ -9901,7 +9905,21 @@ Series.prototype = {
 				chart = series.chart,
 				inverted = chart.inverted,
 				seriesType = series.type,
-				color;
+				color,
+				labelsInsideBars = series.options.stacking && (seriesType === 'column' || seriesType === 'bar');
+
+			if (labelsInsideBars) {
+				// In stacked series the default label placement is inside the bars
+				if (options.verticalAlign === null) {
+					options = merge(options, {verticalAlign: 'middle'});
+				}
+
+				// If no y delta is specified, try to create a good default
+				if (options.y === null) {
+					options = merge(options, {y: {top: 14, middle: 4, bottom: -6}[options.verticalAlign]});
+				}
+			}
+
 
 			// create a separate group for the data labels to avoid rotation
 			if (!dataLabelsGroup) {
@@ -9973,7 +9991,19 @@ Series.prototype = {
 					});
 				}
 
+				if (labelsInsideBars) {
+					var barY = point.barY,
+						barW = point.barW,
+						barH = point.barH;
 
+					dataLabel.align(options, null,
+						{
+							x: inverted ? chart.plotWidth - barY - barH : barX,
+							y: inverted ? chart.plotHeight - barX - barW : barY,
+							width: inverted ? barH : barW,
+							height: inverted ? barW : barH
+						});
+				}
 			});
 		}
 	},
@@ -11127,7 +11157,7 @@ var PieSeries = extendClass(Series, {
 			options = series.options,
 			slicedOffset = options.slicedOffset,
 			connectorOffset = slicedOffset + options.borderWidth,
-			positions = options.center,
+			positions = options.center.concat([options.size, options.innerSize || 0]),
 			chart = series.chart,
 			plotWidth = chart.plotWidth,
 			plotHeight = chart.plotHeight,
@@ -11144,7 +11174,6 @@ var PieSeries = extendClass(Series, {
 			labelDistance = options.dataLabels.distance;
 
 		// get positions - either an integer or a percentage string must be given
-		positions.push(options.size, options.innerSize || 0);
 		positions = map(positions, function(length, i) {
 
 			isPercent = /%$/.test(length);
@@ -11152,6 +11181,7 @@ var PieSeries = extendClass(Series, {
 				// i == 0: centerX, relative to width
 				// i == 1: centerY, relative to height
 				// i == 2: size, relative to smallestSize
+				// i == 4: innerSize, relative to smallestSize
 				[plotWidth, plotHeight, smallestSize, smallestSize][i] *
 					pInt(length) / 100:
 				length;

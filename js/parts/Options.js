@@ -529,6 +529,10 @@ defaultPlotOptions.column = merge(defaultSeriesOptions, {
 			shadow: false
 		}
 	},
+	dataLabels: {
+		y: null,
+		verticalAlign: null
+	},
 	threshold: 0
 });
 defaultPlotOptions.bar = merge(defaultPlotOptions.column, {
