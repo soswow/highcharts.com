@@ -972,7 +972,7 @@ defaultOptions = {
 			animation: {
 				duration: 1000
 			},
-			// connectNulls: false,
+			// connectNulls: false, // docs
 			//cursor: 'default',
 			//clip: true,
 			//dashStyle: null,
@@ -1220,7 +1220,7 @@ var defaultXAxisOptions =  {
 		//x: 0,
 		//y: 0
 	},
-	type: 'linear' // linear or datetime
+	type: 'linear' // linear, logarithmic or datetime // docs
 },
 
 defaultYAxisOptions = merge(defaultXAxisOptions, {
@@ -1488,7 +1488,7 @@ function normalizeTickInterval(interval, multiples, magnitude, options) {
 		//multiples = [1, 2, 2.5, 4, 5, 7.5, 10];
 
 		// the allowDecimals option
-		if (options && options.allowDecimals === false) {
+		if ((options && options.allowDecimals === false) || isLogarithmic) {
 			if (magnitude === 1) {
 				multiples = [1, 2, 5, 10];
 			} else if (magnitude <= 0.1) {
@@ -4530,7 +4530,9 @@ function Chart (options, callback) {
 			);
 
 		var axis = this,
-			isDatetimeAxis = options.type === 'datetime',
+			type = options.type,
+			isDatetimeAxis = type == 'datetime',
+			isLogarithmic = type == 'logarithmic',
 			offset = options.offset || 0,
 			xOrY = isXAxis ? 'x' : 'y',
 			axisLength,
@@ -4671,7 +4673,7 @@ function Chart (options, callback) {
 						isFirst: pos === tickPositions[0],
 						isLast: pos === tickPositions[tickPositions.length - 1],
 						dateTimeLabelFormat: dateTimeLabelFormat,
-						value: (categories && defined(categories[pos]) ? categories[pos] : pos)
+						value: isLogarithmic ? lin2log(value) : value
 					});
 
 
@@ -5213,7 +5215,7 @@ function Chart (options, callback) {
 		 * Translate from axis value to pixel position on the chart, or back
 		 *
 		 */
-		translate = function(val, backwards, cvsCoord, old) {
+		translate = function(val, backwards, cvsCoord, old, doLog2lin) {
 			var sign = 1,
 				cvsOffset = 0,
 				localA = old ? oldTransA : transA,
@@ -5240,6 +5242,9 @@ function Chart (options, callback) {
 				returnValue = val / localA + localMin; // from chart pixel to value
 
 			} else { // normal translation, from axis value to pixel, relative to plot
+				if (isLogarithmic && doLog2lin) {
+					val = log2lin(val);
+				}
 				returnValue = sign * (val - localMin) * localA + cvsOffset;
 			}
 
@@ -5287,6 +5292,13 @@ function Chart (options, callback) {
 				null :
 				renderer.crispLine([M, x1, y1, L, x2, y2], lineWidth || 0);
 		};
+
+		function log2lin(num) {
+			return math.log(num) / math.LN10;
+		}
+		function lin2log(num) {
+			return math.pow(10, num);
+		}
 
 		/**
 		 * Fix JS round off float errors
@@ -5355,6 +5367,11 @@ function Chart (options, callback) {
 			else {
 				min = pick(userMin, options.min, dataMin);
 				max = pick(userMax, options.max, dataMax);
+			}
+
+			if (isLogarithmic) {
+				min = log2lin(min);
+				max = log2lin(max);
 			}
 
 			// handle zoomed range
@@ -9369,12 +9386,12 @@ Series.prototype = {
 			}
 
 			if (defined(yBottom)) {
-				point.yBottom = yAxis.translate(yBottom, 0, 1);
+				point.yBottom = yAxis.translate(yBottom, 0, 1, 0, 1);
 			}
 
 			// set the y value
 			if (yValue !== null) {
-				point.plotY = yAxis.translate(yValue, 0, 1);
+				point.plotY = yAxis.translate(yValue, 0, 1, 0, 1);
 			}
 
 			// set client related positions for mouse tracking
