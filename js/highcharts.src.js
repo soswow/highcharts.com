@@ -972,6 +972,7 @@ defaultOptions = {
 			animation: {
 				duration: 1000
 			},
+			// connectNulls: false,
 			//cursor: 'default',
 			//clip: true,
 			//dashStyle: null,
