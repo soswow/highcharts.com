@@ -8520,6 +8520,7 @@ function Chart (options, callback) {
 		// for Perini's doScroll hack is not enough.
 		var ONREADYSTATECHANGE = 'onreadystatechange',
 		COMPLETE = 'complete';
+		// Note: in spite of JSLint's complaints, win == win.top is required
 		if (!hasSVG && win == win.top && doc.readyState !== COMPLETE) {
 				doc.attachEvent(ONREADYSTATECHANGE, function() {
 				doc.detachEvent(ONREADYSTATECHANGE, firstRender);
