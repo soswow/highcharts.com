@@ -6862,20 +6862,21 @@ function Chart (options, callback) {
 				legendSymbol = item.legendSymbol,
 				hiddenColor = itemHiddenStyle.color,
 				textColor = visible ? options.itemStyle.color : hiddenColor,
-				symbolColor = visible ? item.color : hiddenColor;
+				lineColor = visible ? item.color : hiddenColor,
+				symbolAttr = visible ? item.pointAttr[NORMAL_STATE] : {
+					stroke: hiddenColor,
+					fill: hiddenColor
+				};
+
 			if (legendItem) {
 				legendItem.css({ fill: textColor });
 			}
 			if (legendLine) {
-				legendLine.attr({ stroke: symbolColor });
+				legendLine.attr({ stroke: lineColor });
 			}
 			if (legendSymbol) {
-				legendSymbol.attr({
-					stroke: symbolColor,
-					fill: symbolColor
-				});
+				legendSymbol.attr(symbolAttr);
 			}
-
 		}
 
 		/**
@@ -7047,7 +7048,7 @@ function Chart (options, callback) {
 						2 * radius,
 						2 * radius
 					)
-					.attr(item.pointAttr[NORMAL_STATE])
+					//.attr(item.pointAttr[NORMAL_STATE])
 					.attr({ zIndex: 3 })
 					.add(legendGroup);
 
@@ -8659,6 +8660,9 @@ Point.prototype = {
 				}
 			}
 
+			// cache attributes for shapes
+			series.getAttribs();
+
 			// redraw
 			series.isDirty = true;
 			series.isDirtyData = true;
@@ -10070,7 +10074,7 @@ Series.prototype = {
 		}
 
 		// cache attributes for shapes
-		series.getAttribs();
+		//series.getAttribs();
 
 		// draw the graph if any
 		if (series.drawGraph) {
@@ -11123,7 +11127,7 @@ var PieSeries = extendClass(Series, {
 		var series = this;
 
 		// cache attributes for shapes
-		series.getAttribs();
+		//series.getAttribs();
 
 		this.drawPoints();
 
