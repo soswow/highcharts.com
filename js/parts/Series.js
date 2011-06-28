@@ -1734,7 +1734,7 @@ Series.prototype = {
 		}
 
 		// cache attributes for shapes
-		//series.getAttribs();
+		series.getAttribs();
 
 		// draw the graph if any
 		if (series.drawGraph) {

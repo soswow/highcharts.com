@@ -1977,17 +1977,7 @@ SVGElement.prototype = {
 		});
 
 		wrapper.attr({
-			d: wrapper.renderer.symbols[wrapper.symbolName](
-					mathRound(wrapper.x * 2) / 2, // Round to halves. Issue #274.
-					mathRound(wrapper.y * 2) / 2,
-					wrapper.r,
-			{
-				start: wrapper.start,
-				end: wrapper.end,
-				width: wrapper.width,
-				height: wrapper.height,
-				innerR: wrapper.innerR
-			})
+			d: wrapper.renderer.symbols[wrapper.symbolName](wrapper.x, wrapper.y, wrapper.width, wrapper.height, wrapper)
 		});
 	},
 
@@ -10378,7 +10368,7 @@ Series.prototype = {
 		}
 
 		// cache attributes for shapes
-		//series.getAttribs();
+		series.getAttribs();
 
 		// draw the graph if any
 		if (series.drawGraph) {
