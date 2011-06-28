@@ -796,6 +796,7 @@ Series.prototype = {
 			processedYData = series.yData,
 			dataLength = processedXData.length,
 			cropStart = 0,
+			i, // loop variable
 			cropThreshold = series.options.cropThreshold; // todo: consider combining it with turboThreshold
 
 
@@ -857,7 +858,9 @@ Series.prototype = {
 			i;
 
 		if (!data && !hasGroupedData) {
-			data = series.data = new Array(dataOptions.length);
+			var arr = [];
+			arr.length = dataOptions.length;
+			data = series.data = arr;
 		}
 
 		for (i = 0; i < processedDataLength; i++) {

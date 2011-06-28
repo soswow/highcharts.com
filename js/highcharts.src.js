@@ -522,7 +522,7 @@ function normalizeTickInterval(interval, multiples, magnitude, options) {
 		//multiples = [1, 2, 2.5, 4, 5, 7.5, 10];
 
 		// the allowDecimals option
-		if ((options && options.allowDecimals === false) || isLog) {
+		if (options && options.allowDecimals === false) {
 			if (magnitude === 1) {
 				multiples = [1, 2, 5, 10];
 			} else if (magnitude <= 0.1) {
@@ -3466,6 +3466,7 @@ var VMLElement = extendClass( SVGElement, {
 			key,
 			value,
 			i,
+			result,
 			element = wrapper.element || {},
 			elemStyle = element.style,
 			nodeName = element.nodeName,
@@ -3837,7 +3838,7 @@ var VMLElement = extendClass( SVGElement, {
 				marginTop: translateY
 			});
 			if (shadows) { // used in labels/tooltip
-				each (shadows, function(shadow) {
+				each(shadows, function(shadow) {
 					css(shadow, {
 						marginLeft: translateX + 1,
 						marginTop: translateY + 1
@@ -4413,9 +4414,8 @@ VMLRenderer.prototype = { // inherit SVGRenderer
 				return [];
 			}
 			var right = left + width,
-				bottom = top + height;
-
-			r = mathMin(options.r || 0, width, height);
+				bottom = top + height,
+				r = mathMin(options.r || 0, width, height);
 
 			return [
 				M,
@@ -4465,8 +4465,8 @@ VMLRenderer.prototype = { // inherit SVGRenderer
 // Makes it visible in editor:
 var forNSvgRenderer;
 for (forNSvgRenderer in SVGRenderer.prototype) {
-	if (!VMLRenderer.prototype[n]) {
-		VMLRenderer.prototype[n] = SVGRenderer.prototype[n];
+	if (!VMLRenderer.prototype[forNSvgRenderer]) {
+		VMLRenderer.prototype[forNSvgRenderer] = SVGRenderer.prototype[forNSvgRenderer];
 	}
 }
 
@@ -5322,7 +5322,7 @@ function Chart (options, callback) {
 										if (!stacks[key][x]) {
 											stacks[key][x] = new StackItem(options.stackLabels, isNegative, x);
 										}
-										stacks[key][x].setTotal(totalPos);
+										stacks[key][x].setTotal(y);
 
 									}
 
@@ -5523,8 +5523,8 @@ function Chart (options, callback) {
 
 			// handle zoomed range
 			if (range) {
-				userSetMin = min = max - range;
-				userSetMax = max;
+				userMin = min = max - range;
+				userMax = max;
 				if (secondPass) {
 					range = null;  // don't use it when running setExtremes
 				}
@@ -7398,7 +7398,7 @@ function Chart (options, callback) {
 			each(series, function(serie) {
 				var seriesOptions = serie.options;
 
-				if (!serieOptions.showInLegend) {
+				if (!seriesOptions.showInLegend) {
 					return;
 				}
 
@@ -9440,6 +9440,7 @@ Series.prototype = {
 			processedYData = series.yData,
 			dataLength = processedXData.length,
 			cropStart = 0,
+			i, // loop variable
 			cropThreshold = series.options.cropThreshold; // todo: consider combining it with turboThreshold
 
 
@@ -9501,7 +9502,9 @@ Series.prototype = {
 			i;
 
 		if (!data && !hasGroupedData) {
-			data = series.data = new Array(dataOptions.length);
+			var arr = [];
+			arr.length = dataOptions.length;
+			data = series.data = arr;
 		}
 
 		for (i = 0; i < processedDataLength; i++) {

@@ -388,7 +388,7 @@ function normalizeTickInterval(interval, multiples, magnitude, options) {
 		//multiples = [1, 2, 2.5, 4, 5, 7.5, 10];
 
 		// the allowDecimals option
-		if ((options && options.allowDecimals === false) || isLog) {
+		if (options && options.allowDecimals === false) {
 			if (magnitude === 1) {
 				multiples = [1, 2, 5, 10];
 			} else if (magnitude <= 0.1) {

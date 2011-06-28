@@ -841,7 +841,7 @@ function Chart (options, callback) {
 										if (!stacks[key][x]) {
 											stacks[key][x] = new StackItem(options.stackLabels, isNegative, x);
 										}
-										stacks[key][x].setTotal(totalPos);
+										stacks[key][x].setTotal(y);
 
 									}
 
@@ -1042,8 +1042,8 @@ function Chart (options, callback) {
 
 			// handle zoomed range
 			if (range) {
-				userSetMin = min = max - range;
-				userSetMax = max;
+				userMin = min = max - range;
+				userMax = max;
 				if (secondPass) {
 					range = null;  // don't use it when running setExtremes
 				}
@@ -2917,7 +2917,7 @@ function Chart (options, callback) {
 			each(series, function(serie) {
 				var seriesOptions = serie.options;
 
-				if (!serieOptions.showInLegend) {
+				if (!seriesOptions.showInLegend) {
 					return;
 				}
 

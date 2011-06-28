@@ -101,6 +101,7 @@ var VMLElement = extendClass( SVGElement, {
 			key,
 			value,
 			i,
+			result,
 			element = wrapper.element || {},
 			elemStyle = element.style,
 			nodeName = element.nodeName,
@@ -472,7 +473,7 @@ var VMLElement = extendClass( SVGElement, {
 				marginTop: translateY
 			});
 			if (shadows) { // used in labels/tooltip
-				each (shadows, function(shadow) {
+				each(shadows, function(shadow) {
 					css(shadow, {
 						marginLeft: translateX + 1,
 						marginTop: translateY + 1
@@ -1048,9 +1049,8 @@ VMLRenderer.prototype = { // inherit SVGRenderer
 				return [];
 			}
 			var right = left + width,
-				bottom = top + height;
-
-			r = mathMin(options.r || 0, width, height);
+				bottom = top + height,
+				r = mathMin(options.r || 0, width, height);
 
 			return [
 				M,
@@ -1100,8 +1100,8 @@ VMLRenderer.prototype = { // inherit SVGRenderer
 // Makes it visible in editor:
 var forNSvgRenderer;
 for (forNSvgRenderer in SVGRenderer.prototype) {
-	if (!VMLRenderer.prototype[n]) {
-		VMLRenderer.prototype[n] = SVGRenderer.prototype[n];
+	if (!VMLRenderer.prototype[forNSvgRenderer]) {
+		VMLRenderer.prototype[forNSvgRenderer] = SVGRenderer.prototype[forNSvgRenderer];
 	}
 }
 
