@@ -285,7 +285,7 @@ SVGElement.prototype = {
 			values = {},
 			normalizer;
 
-		strokeWidth = strokeWidth || wrapper.strokeWidth || wrapper.attr('stroke-width') || 0;
+		strokeWidth = strokeWidth || wrapper.strokeWidth || (wrapper.attr && wrapper.attr('stroke-width')) || 0;
 		normalizer = strokeWidth % 2 / 2;
 
 		// normalize for crisp edges
@@ -994,13 +994,13 @@ SVGRenderer.prototype = {
 					.css(pressedState.style);
 			}
 		};
-
-		return label.css({ cursor: 'default' })
+		
+		return label
 			.on('click', function() {
 				callback.call(label);
 			})
 			.attr(normalState)
-			.css(normalState.style);
+			.css(extend({ cursor: 'default' }, normalState.style));
 
 	},
 

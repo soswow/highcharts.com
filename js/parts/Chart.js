@@ -328,12 +328,12 @@ function Chart (options, callback) {
 				// get x and y position for ticks and labels
 				x = horiz ?
 					translate(pos + tickmarkOffset, null, null, old) + transB :
-					axisLeft + offset + (opposite ? (old && (oldChartWidth || chartWidth)) - axisRight - axisLeft : 0);
-
+					axisLeft + offset + (opposite ? ((old && oldChartWidth) || chartWidth) - axisRight - axisLeft : 0);
+				
 				y = horiz ?
 					cHeight - axisBottom + offset - (opposite ? axisHeight : 0) :
 					cHeight - translate(pos + tickmarkOffset, null, null, old) - transB;
-
+				
 				// create the grid line
 				if (gridLineWidth) {
 					gridLinePath = getPlotLinePath(pos + tickmarkOffset, gridLineWidth, old);
