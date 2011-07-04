@@ -38,7 +38,7 @@ seriesProto.processData = function() {
 		groupedData = series.groupedData,
 		groupedXData = [],
 		groupedYData = [];
-
+	
 	// clear previous groups
 	each (groupedData || [], function(point, i) {
 		if (point) {
@@ -96,7 +96,7 @@ seriesProto.processData = function() {
 				value = value === UNDEFINED || value === null ? pointY : value + pointY;
 			} else if (ohlcData) {
 				var index = series.cropStart + i,
-					point = data[index] || series.pointClass.prototype.applyOptions.apply({}, [dataOptions[index]]);
+					point = (data && data[index]) || series.pointClass.prototype.applyOptions.apply({}, [dataOptions[index]]);
 				if (open === null) { // first point
 					open = point.open;
 				}
