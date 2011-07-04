@@ -388,6 +388,7 @@ Point.prototype = {
 			stateDisabled = markerStateOptions && markerStateOptions.enabled === false,
 			stateMarkerGraphic = series.stateMarkerGraphic,
 			chart = series.chart,
+			radius,
 			pointAttr = point.pointAttr;
 
 		state = state || NORMAL_STATE; // empty string
@@ -415,13 +416,18 @@ Point.prototype = {
 		else {
 			if (state) {
 				if (!stateMarkerGraphic) {
-					series.stateMarkerGraphic = stateMarkerGraphic = chart.renderer.circle(
-						0, 0, pointAttr[state].r
+					radius = markerOptions.radius;
+					series.stateMarkerGraphic = stateMarkerGraphic = chart.renderer.symbol(
+						series.symbol,
+						- radius,
+						- radius,
+						2 * radius,
+						2 * radius
 					)
 					.attr(pointAttr[state])
 					.add(series.group);
 				}
-
+				
 				stateMarkerGraphic.translate(
 					point.plotX,
 					point.plotY
