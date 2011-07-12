@@ -164,7 +164,7 @@ var VMLElement = extendClass( SVGElement, {
 						}
 						
 					}
-					value = convertedPath.join(' ') || 'x';							
+					value = convertedPath.join(' ') || 'x';	
 					element.path = value;
 			
 					// update shadows
@@ -351,8 +351,6 @@ var VMLElement = extendClass( SVGElement, {
 		
 		wrapper.styles = extend(wrapper.styles, styles);
 		css(wrapper.element, styles);
-		
-		
 		
 		return wrapper;
 	},
@@ -909,6 +907,7 @@ VMLRenderer.prototype = merge( SVGRenderer.prototype, { // inherit SVGRenderer
 			width = x.width;
 			height = x.height;
 			r = x.r;
+			strokeWidth = x.strokeWidth;
 			x = x.x;
 		}
 		var wrapper = this.symbol('rect');
@@ -1078,4 +1077,3 @@ Renderer = VMLRenderer;
  * END OF INTERNET EXPLORER <= 8 SPECIFIC CODE                                *
  *                                                                            *
  *****************************************************************************/
-

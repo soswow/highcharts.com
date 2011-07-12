@@ -83,8 +83,8 @@ defaultLabelOptions = {
 	},*/
 	style: {
 		color: '#666',
-		'font-size': '11px',
-		'line-height': '14px'
+		fontSize: '11px',
+		lineHeight: '14px'
 	}
 };
 
@@ -418,23 +418,7 @@ var defaultXAxisOptions =  {
 		//x: 0,
 		//y: 0
 	},
-	type: 'linear', // linear, logarithmic or datetime // docs
-	stackLabels: { // docs
-		enabled: false,
-		//align: dynamic,
-		//y: dynamic,
-		//x: dynamic,
-		//verticalAlign: dynamic
-		//textAlign: dynamic
-		formatter: function() {
-			return this.total;
-		},
-		style: {
-			color: '#666',
-			'font-size': '11px',
-			'line-height': '14px'
-		}
-	}
+	type: 'linear' // linear, logarithmic or datetime // docs
 },
 
 defaultYAxisOptions = merge(defaultXAxisOptions, {
@@ -455,6 +439,19 @@ defaultYAxisOptions = merge(defaultXAxisOptions, {
 	title: {
 		rotation: 270,
 		text: 'Y-values'
+	},
+	stackLabels: {
+		enabled: false,
+		//align: dynamic,
+		//y: dynamic,
+		//x: dynamic,
+		//verticalAlign: dynamic,
+		//textAlign: dynamic,
+		//rotation: 0,
+		formatter: function() {
+			return this.total;
+		},
+		style: defaultLabelOptions.style
 	}
 }),
 

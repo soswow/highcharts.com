@@ -227,12 +227,16 @@ SVGElement.prototype = {
 	symbolAttr: function(hash) {
 		var wrapper = this;
 		
-		each (['x', 'y', 'r', 'start', 'end', 'width', 'height', 'innerR'], function(key) {
+		each(['x', 'y', 'r', 'start', 'end', 'width', 'height', 'innerR'], function(key) {
 			wrapper[key] = pick(hash[key], wrapper[key]);
 		});
 		
 		wrapper.attr({ 
-			d: wrapper.renderer.symbols[wrapper.symbolName](wrapper.x, wrapper.y, wrapper.r, {
+			d: wrapper.renderer.symbols[wrapper.symbolName](
+					mathRound(wrapper.x * 2) / 2, // Round to halves. Issue #274.
+					mathRound(wrapper.y * 2) / 2, 
+					wrapper.r, 
+			{
 				start: wrapper.start, 
 				end: wrapper.end,
 				width: wrapper.width, 
@@ -294,23 +298,16 @@ SVGElement.prototype = {
 		var elemWrapper = this,
 			elem = elemWrapper.element,
 			textWidth = styles && styles.width && elem.nodeName === 'text',
-			camelStyles = styles,
-			n;
+			n,
+			serializedCss = '',
+			hyphenate = function(a, b){ return '-'+ b.toLowerCase(); };
 			
-		// hyphenate
-		if (defined(styles)) {
-			styles = {};
-			for (n in camelStyles) {
-				styles[hyphenate(n)] = camelStyles[n];
-			}
-		}
-		
 		// convert legacy
 		if (styles && styles.color) {
 			styles.fill = styles.color;
 		}
-		
-		// save the styles in an object
+
+		// Merge the new styles with the old ones
 		styles = extend(
 			elemWrapper.styles,
 			styles
@@ -320,6 +317,7 @@ SVGElement.prototype = {
 		// store object
 		elemWrapper.styles = styles;
 		
+		
 		// serialize and set style attribute
 		if (isIE && !hasSVG) { // legacy IE doesn't support setting style attribute
 			if (textWidth) {
@@ -327,8 +325,11 @@ SVGElement.prototype = {
 			} 
 			css(elemWrapper.element, styles);	
 		} else {
+			for (n in styles) {
+				serializedCss += n.replace(/([A-Z])/g, hyphenate) + ':'+ styles[n] + ';';
+			}
 			elemWrapper.attr({
-				style: serializeCSS(styles)
+				style: serializedCss
 			});
 		}	
 		
@@ -774,11 +775,11 @@ SVGRenderer.prototype = {
 			hrefRegex = /href="([^"]+)"/,
 			parentX = attr(textNode, 'x'),
 			textStyles = wrapper.styles,
-			reverse = isFirefox && textStyles && textStyles['-hc-direction'] === 'rtl' && 
+			reverse = isFirefox && textStyles && textStyles.HcDirection === 'rtl' && 
 				!this.forExport && pInt(userAgent.split('Firefox/')[1]) < 4, // issue #38
 			arr,
 			width = textStyles && pInt(textStyles.width),
-			textLineHeight = textStyles && textStyles['line-height'],
+			textLineHeight = textStyles && textStyles.lineHeight,
 			lastLine,
 			GET_COMPUTED_STYLE = 'getComputedStyle',
 			i = childNodes.length;
@@ -814,7 +815,9 @@ SVGRenderer.prototype = {
 						css(tspan, { cursor: 'pointer' });
 					}
 					
-					span = span.replace(/<(.|\n)*?>/g, '') || ' ';
+					span = (span.replace(/<(.|\n)*?>/g, '') || ' ')
+						.replace(/&lt;/g, '<')
+						.replace(/&gt;/g, '>');
 					
 					// issue #38 workaround.
 					if (reverse) {
@@ -848,7 +851,7 @@ SVGRenderer.prototype = {
 							// Webkit and opera sometimes return 'normal' as the line height. In that
 							// case, webkit uses offsetHeight, while Opera falls back to 18
 							lineHeight = win[GET_COMPUTED_STYLE] &&
-								win[GET_COMPUTED_STYLE](lastLine, null).getPropertyValue('line-height');
+								pInt(win[GET_COMPUTED_STYLE](lastLine, null).getPropertyValue('line-height'));
 							
 							if (!lineHeight || isNaN(lineHeight)) {
 								lineHeight = textLineHeight || lastLine.offsetHeight || 18;
@@ -998,6 +1001,7 @@ SVGRenderer.prototype = {
 			width = x.width;
 			height = x.height;
 			r = x.r;
+			strokeWidth = x.strokeWidth;
 			x = x.x;	
 		}
 		var wrapper = this.createElement('rect').attr({
@@ -1102,8 +1106,8 @@ SVGRenderer.prototype = {
 			
 			// check if there's a path defined for this symbol
 			path = symbolFn && symbolFn(
-				x, 
-				y, 
+				mathRound(x), 
+				mathRound(y),
 				radius, 
 				options
 			),
@@ -1160,7 +1164,6 @@ SVGRenderer.prototype = {
 				createElement('img', {
 					onload: function() {
 						var img = this;
-
 						centerImage(obj, symbolSizes[imageSrc] = [img.width, img.height]);
 					},
 					src: imageSrc
@@ -1359,8 +1362,8 @@ SVGRenderer.prototype = {
 				text: str	
 			})
 			.css({
-				'font-family': defaultChartStyle.fontFamily,
-				'font-size': defaultChartStyle.fontSize
+				fontFamily: defaultChartStyle.fontFamily,
+				fontSize: defaultChartStyle.fontSize
 			});
 			
 		wrapper.x = x;

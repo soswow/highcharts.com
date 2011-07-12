@@ -1,8 +1,8 @@
 /** 
- * @license Highcharts JS v2.1.4 (2011-03-30)
+ * @license Highcharts JS v2.1.6 (2011-07-08)
  * MooTools adapter
  * 
- * (c) 2010 Torstein Hønsi
+ * (c) 2010-2011 Torstein Hønsi
  * 
  * License: www.highcharts.com/license
  */
@@ -164,14 +164,6 @@ win.HighchartsAdapter = {
 	},
 	
 	/**
-	 * Hyphenate a string, like minWidth becomes min-width
-	 * @param {Object} str
-	 */
-	hyphenate: function (str){
-		return str.hyphenate();
-	},
-	
-	/**
 	 * Add an event listener
 	 * @param {Object} el HTML element or custom object
 	 * @param {String} type Event type
@@ -204,8 +196,13 @@ win.HighchartsAdapter = {
 				type = 'beforeunload';
 			}
 
-
-			el.removeEvent(type, fn);
+			if (defined(fn)) {
+				el.removeEvent(type, fn);
+			} else {
+				el.removeEvents(type);
+			}
+		} else {
+			el.removeEvents();
 		}
 	},
 	

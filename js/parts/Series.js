@@ -11,6 +11,7 @@ Point.prototype = {
 	 */
 	init: function(series, options) {
 		var point = this,
+			counters = series.chart.counters,
 			defaultColors;
 		point.series = series;
 		point.applyOptions(options);
@@ -21,12 +22,10 @@ Point.prototype = {
 			if (!point.options) {
 				point.options = {};
 			}
-			point.color = point.options.color = point.color || defaultColors[colorCounter++];
+			point.color = point.options.color = point.color || defaultColors[counters.color++];
 			
 			// loop back to zero
-			if (colorCounter >= defaultColors.length) {
-				colorCounter = 0;
-			}
+			counters.wrapColor(defaultColors.length);
 		}
 		
 		series.chart.pointCount++;
@@ -508,7 +507,7 @@ Series.prototype = {
 		// connect nulls
 		if (series.options.connectNulls) {
 			for (i = data.length - 1; i >= 0; i--) {
-				if (data[i].y === null && data[i - 1] && data [i + 1]) {
+				if (data[i].y === null && data[i - 1] && data[i + 1]) {
 					data.splice(i, 1);
 				}
 			}
@@ -574,22 +573,19 @@ Series.prototype = {
 	 * Get the series' color
 	 */
 	getColor: function(){
-		var defaultColors = this.chart.options.colors;
-		this.color = this.options.color || defaultColors[colorCounter++] || '#0000ff';
-		if (colorCounter >= defaultColors.length) {
-			colorCounter = 0;
-		}
+		var defaultColors = this.chart.options.colors,
+			counters = this.chart.counters;
+		this.color = this.options.color || defaultColors[counters.color++] || '#0000ff';
+		counters.wrapColor(defaultColors.length);
 	},
 	/**
 	 * Get the series' symbol
 	 */
 	getSymbol: function(){
 		var defaultSymbols = this.chart.options.symbols,
-			symbol = this.options.marker.symbol || defaultSymbols[symbolCounter++];
-		this.symbol = symbol;
-		if (symbolCounter >= defaultSymbols.length) { 
-			symbolCounter = 0;
-		}
+			counters = this.chart.counters;
+		this.symbol = this.options.marker.symbol || defaultSymbols[counters.symbol++];
+		counters.wrapSymbol(defaultSymbols.length);
 	},
 	
 	/**
@@ -649,7 +645,7 @@ Series.prototype = {
 		
 		series.xIncrement = null; // reset for new data
 		if (defined(initialColor)) { // reset colors for pie
-			colorCounter = initialColor;
+			chart.counters.color = initialColor;
 		}
 		
 		data = map(splat(data || []), function(pointOptions) {
@@ -1139,6 +1135,9 @@ Series.prototype = {
 			destroy,
 			prop;
 		
+		// add event hook
+		fireEvent(series, 'destroy');
+		
 		// remove all events
 		removeEvent(series);
 			
@@ -1213,11 +1212,6 @@ Series.prototype = {
 					if (vAlignIsNull) {
 						options = merge(options, {verticalAlign: 'top'});
 					}
-
-					// If no y delta is specified, set the default
-					if (yIsNull) {
-						options = merge(options, {y: -6}); 
-					}
 				}
 			}
 
@@ -1246,20 +1240,30 @@ Series.prototype = {
 					plotX = (barX && barX + point.barW / 2) || point.plotX || -999,
 					plotY = pick(point.plotY, -999),
 					dataLabel = point.dataLabel,
-					align = options.align;
-					
+					align = options.align,
+					individualYDelta = yIsNull ? (point.y > 0 ? -6 : 12) : options.y;
+
 				// get the string
 				str = options.formatter.call(point.getLabelConfig());
 				x = (inverted ? chart.plotWidth - plotY : plotX) + options.x;
-				y = (inverted ? chart.plotHeight - plotX : plotY) + options.y;
+				y = (inverted ? chart.plotHeight - plotX : plotY) + individualYDelta;
 				
 				// in columns, align the string to the column
 				if (seriesType === 'column') {
 					x += { left: -1, right: 1 }[align] * point.barW / 2 || 0;
 				}
 				
+				if (inverted && point.y < 0) {
+					align = 'right';
+					x -= 10;
+				}
+
 				// update existing label
 				if (dataLabel) {
+					// vertically centered
+					if (inverted && !options.y) {
+						y = y + pInt(dataLabel.styles.lineHeight) * 0.9 - dataLabel.getBBox().height / 2;
+					}
 					dataLabel
 						.attr({
 							text: str
@@ -1281,14 +1285,14 @@ Series.prototype = {
 					})
 					.css(options.style)
 					.add(dataLabelsGroup);
+					// vertically centered
+					if (inverted && !options.y) {
+						dataLabel.attr({
+							y: y + pInt(dataLabel.styles.lineHeight) * 0.9 - dataLabel.getBBox().height / 2
+						});
+					}
 				}
 				
-				// vertically centered
-				if (inverted && !options.y) {
-					dataLabel.attr({
-						y: y + pInt(dataLabel.styles['line-height']) * 0.9 - dataLabel.getBBox().height / 2
-					});
-				}
 				
 				/*if (series.isCartesian) {
 					dataLabel[chart.isInsidePlot(plotX, plotY) ? 'show' : 'hide']();
@@ -1491,6 +1495,9 @@ Series.prototype = {
 				
 				setInvert(); // do it now
 				addEvent(chart, 'resize', setInvert); // do it on resize
+				addEvent(series, 'destroy', function() {
+					removeEvent(chart, 'resize', setInvert);
+				});
 			} 
 			group.clip(series.clipRect)
 				.attr({ 

@@ -213,8 +213,7 @@ function Chart (options, callback) {
 						plotWidth / categories.length) ||
 						(!horiz && plotWidth / 2),
 					css,
-					label = this.label,
-					value = categories && defined(categories[pos]) ? categories[pos] : pos;
+					label = this.label;
 					
 				
 				// get the string
@@ -222,8 +221,9 @@ function Chart (options, callback) {
 						isFirst: pos === tickPositions[0],
 						isLast: pos === tickPositions[tickPositions.length - 1],
 						dateTimeLabelFormat: dateTimeLabelFormat,
-						value: isLog ? lin2log(value) : value
+						value: (categories && categories[pos] ? categories[pos] : pos)
 					});
+				
 				
 				// prepare CSS
 				css = width && { width: mathMax(1, mathRound(width - 2 * (labelOptions.padding || 10))) +PX };
@@ -370,7 +370,7 @@ function Chart (options, callback) {
 						
 					// vertically centered
 					if (!defined(labelOptions.y)) {
-						y += pInt(label.styles['line-height']) * 0.9 - label.getBBox().height / 2;
+						y += pInt(label.styles.lineHeight) * 0.9 - label.getBBox().height / 2;
 					}
 					
 						
@@ -1128,8 +1128,8 @@ function Chart (options, callback) {
 		function setLinearTickPositions() {
 			
 			var i,
-				roundedMin = mathFloor(min / tickInterval) * tickInterval,
-				roundedMax = mathCeil(max / tickInterval) * tickInterval;
+				roundedMin = correctFloat(mathFloor(min / tickInterval) * tickInterval),
+				roundedMax = correctFloat(mathCeil(max / tickInterval) * tickInterval);
 				
 			tickPositions = [];
 			
@@ -1903,10 +1903,7 @@ function Chart (options, callback) {
 		
 		// create the elements
 		var group = renderer.g('tooltip')
-			.attr({  
-				zIndex: 8,
-				translateY: -99
-			})
+			.attr({	zIndex: 8 })
 			.add(),
 			
 			box = renderer.rect(boxOffLeft, boxOffLeft, 0, 0, options.borderRadius, borderWidth)
@@ -1990,7 +1987,7 @@ function Chart (options, callback) {
 			
 				// hide previous hoverPoints and set new
 				if (hoverPoints) {
-					each (hoverPoints, function(point) {
+					each(hoverPoints, function(point) {
 						point.setState();
 					});
 				}
@@ -2028,7 +2025,7 @@ function Chart (options, callback) {
 				
 				// hide previous hoverPoints and set new
 				if (hoverPoints) {
-					each (hoverPoints, function(point) {
+					each(hoverPoints, function(point) {
 						point.setState();
 					});
 				}
@@ -2109,8 +2106,7 @@ function Chart (options, callback) {
 				
 				// it is too far to the left, adjust it
 				if (boxX < 7) {
-					boxX = 7;
-					boxY -= 30;
+					boxX = plotLeft + x + 15;
 				}
 				
 				
@@ -2424,9 +2420,12 @@ function Chart (options, callback) {
 			container.onmousedown = function(e) {
 				e = normalizeMouseEvent(e);
 				
-				// record the start position
-				//e.preventDefault && e.preventDefault();
+				// issue #295, dragging not always working in Firefox
+				if (!hasTouch && e.preventDefault) {
+					e.preventDefault();
+				}
 				
+				// record the start position
 				chart.mouseIsDown = mouseIsDown = true;
 				mouseDownX = e.chartX;
 				mouseDownY = e.chartY;
@@ -2832,8 +2831,9 @@ function Chart (options, callback) {
 				simpleSymbol,
 				li = item.legendItem,
 				series = item.series || item,
-				i = allItems.length;
-				
+				i = allItems.length,
+				itemOptions = series.options,
+				strokeWidth = (itemOptions && itemOptions.borderWidth) || 0;				
 			
 			if (!li) { // generate it once, later move it
 			
@@ -2872,14 +2872,13 @@ function Chart (options, callback) {
 					.add(legendGroup);
 				
 				// draw the line
-				if (!simpleSymbol && item.options && item.options.lineWidth) {
-					var itemOptions = item.options;
-						attribs = {
+				if (!simpleSymbol && itemOptions && itemOptions.lineWidth) {
+					var attrs = {
 							'stroke-width': itemOptions.lineWidth,
 							zIndex: 2
 						};
 					if (itemOptions.dashStyle) {
-						attribs.dashstyle = itemOptions.dashStyle;
+						attrs.dashstyle = itemOptions.dashStyle;
 					}
 					item.legendLine = renderer.path([
 						M,
@@ -2889,13 +2888,13 @@ function Chart (options, callback) {
 						-symbolPadding, 
 						0
 					])
-					.attr(attribs)
+					.attr(attrs)
 					.add(legendGroup);
 				}
 					
 				// draw a simple symbol
 				if (simpleSymbol) { // bar|pie|area|column
-					//legendLayer.drawRect(
+					
 					legendSymbol = renderer.rect(
 						(symbolX = -symbolWidth - symbolPadding),
 						(symbolY = -11),
@@ -2903,18 +2902,18 @@ function Chart (options, callback) {
 						12,
 						2
 					).attr({
-						'stroke-width': 0,
+						//'stroke-width': 0,
 						zIndex: 3
 					}).add(legendGroup);
 				}
 					
 				// draw the marker
-				else if (item.options && item.options.marker && item.options.marker.enabled) {
+				else if (itemOptions && itemOptions.marker && itemOptions.marker.enabled) {
 					legendSymbol = renderer.symbol(
 						item.symbol,
 						(symbolX = -symbolWidth / 2 - symbolPadding), 
 						(symbolY = -4),
-						item.options.marker.radius
+						itemOptions.marker.radius
 					)
 					//.attr(item.pointAttr[NORMAL_STATE])
 					.attr({ zIndex: 3 })
@@ -2922,8 +2921,8 @@ function Chart (options, callback) {
 				
 				}
 				if (legendSymbol) {
-					legendSymbol.xOff = symbolX;
-					legendSymbol.yOff = symbolY;
+					legendSymbol.xOff = symbolX + (strokeWidth % 2 / 2);
+					legendSymbol.yOff = symbolY + (strokeWidth % 2 / 2);
 				}
 				
 				item.legendSymbol = legendSymbol;
@@ -2933,7 +2932,7 @@ function Chart (options, callback) {
 				
 				
 				// add the HTML checkbox on top
-				if (item.options && item.options.showCheckbox) {
+				if (itemOptions && itemOptions.showCheckbox) {
 					item.checkbox = createElement('input', {
 						type: 'checkbox',
 						checked: item.selected,
@@ -4133,7 +4132,8 @@ function Chart (options, callback) {
 		// for Perini's doScroll hack is not enough.
 		var ONREADYSTATECHANGE = 'onreadystatechange',
 			COMPLETE = 'complete';
-		if (isIE && !hasSVG && win === win.top && doc.readyState !== COMPLETE) {
+		// Note: in spite of JSLint's complaints, win == win.top is required
+		if (!hasSVG && win == win.top && doc.readyState !== COMPLETE) {
 			doc.attachEvent(ONREADYSTATECHANGE, function() {
 				doc.detachEvent(ONREADYSTATECHANGE, firstRender);
 				if (doc.readyState === COMPLETE) {
@@ -4142,10 +4142,6 @@ function Chart (options, callback) {
 			});
 			return;
 		}
-
-		// Set to zero for each new chart
-		colorCounter = 0;
-		symbolCounter = 0;
 
 		// create the container
 		getContainer();
@@ -4215,7 +4211,6 @@ function Chart (options, callback) {
 	
 	
 	
-	
 	// Expose methods and variables
 	chart.addSeries = addSeries;
 	chart.animation = useCanVG ? false : pick(optionsChart.animation, true);
@@ -4230,6 +4225,7 @@ function Chart (options, callback) {
 	chart.setTitle = setTitle;
 	chart.showLoading = showLoading;	
 	chart.pointCount = 0;
+	chart.counters = new ChartCounters();
 	/*
 	if ($) $(function() {
 		$container = $('#container');

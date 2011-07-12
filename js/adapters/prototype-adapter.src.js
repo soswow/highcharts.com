@@ -1,5 +1,5 @@
 /** 
- * @license Highcharts JS v2.1.4 (2011-03-02)
+ * @license Highcharts JS v2.1.6 (2011-07-08)
  * Prototype adapter
  * 
  * @author Michael Nelson, Torstein Hønsi.
@@ -84,11 +84,23 @@ return {
 			});
 		}
 	},
-	
+
+	/**
+	 * Custom events in prototype needs to be namespaced. This method adds a namespace 'h:' in front of
+	 * events that are not recognized as native.
+	 */
+	addNS: function(eventName) {
+		var HTMLEvents = /^(?:load|unload|abort|error|select|change|submit|reset|focus|blur|resize|scroll)$/,
+			MouseEvents = /^(?:click|mouse(?:down|up|over|move|out))$/;
+		return (HTMLEvents.test(eventName) || MouseEvents.test(eventName)) ?
+			eventName :
+			'h:' + eventName;
+	},
+
 	// el needs an event to be attached. el is not necessarily a dom element
 	addEvent: function(el, event, fn) {
 		if (el.addEventListener || el.attachEvent) {
-			Event.observe($(el), event, fn);
+			Event.observe($(el), HighchartsAdapter.addNS(event), fn);
 		
 		} else {
 			HighchartsAdapter._extend(el);
@@ -137,12 +149,12 @@ return {
 	// fire an event based on an event name (event) and an object (el).
 	// again, el may not be a dom element
 	fireEvent: function(el, event, eventArguments, defaultFunction){
-		if (event.preventDefault) {
+		if (event.preventDefault) { // TODO: event is a string here so this doesnt make sense at all
 			defaultFunction = null;
 		}
 		
 		if (el.fire) {
-			el.fire(event, eventArguments);
+			el.fire(HighchartsAdapter.addNS(event), eventArguments);
 		} else if (el._highcharts_extended) {
 			el._highcharts_fire(event, eventArguments);
 		}
@@ -154,8 +166,10 @@ return {
 	
 	removeEvent: function(el, event, handler){
 		if ($(el).stopObserving) {
+			if (event) {
+				event = HighchartsAdapter.addNS(event);
+			}
 			$(el).stopObserving(event, handler);
-			
 		} else {
 			HighchartsAdapter._extend(el);
 			el._highcharts_stop_observing(event, handler);
@@ -165,13 +179,6 @@ return {
 	// um, grep
 	grep: function(arr, fn){
 		return arr.findAll(fn);
-	},
-	
-	// change leftPadding to left-padding
-	hyphenate: function(str){
-		return str.replace(/([A-Z])/g, function(a, b){
-			return '-' + b.toLowerCase();
-		});
 	},
 	
 	// um, map
@@ -266,7 +273,15 @@ return {
 					this._highchart_events[name] = [this._highchart_events[name], fn].compact().flatten();
 				},
 				_highcharts_stop_observing: function(name, fn){
-					this._highchart_events[name] = [this._highchart_events[name]].compact().flatten().without(fn);
+					if (name) {
+						if (fn) {
+							this._highchart_events[name] = [this._highchart_events[name]].compact().flatten().without(fn);
+						} else {
+							delete this._highchart_events[name];
+						}
+					} else {
+						this._highchart_events = {};
+					}
 				},
 				_highcharts_fire: function(name, args){
 					(this._highchart_events[name] || []).each(function(fn){
