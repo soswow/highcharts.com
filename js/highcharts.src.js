@@ -175,6 +175,16 @@ function pInt(s, mag) {
 }
 
 /**
+ * Rounds number to some specific precision (number of decimals digits)
+ * @param {Number} number Number to round
+ * @param {Number} precision Number of decimals digits
+ */
+function roundToDecimal(number, precision){
+	var oneWZeros = Math.pow(10, precision);
+	return Math.round( number * oneWZeros) / oneWZeros;
+}
+
+/**
  * Check for string
  * @param {Object} s
  */
@@ -11807,7 +11817,7 @@ seriesProto.processData = function() {
 			while (groupPositions[1] !== UNDEFINED && processedXData[i] >= groupPositions[1]) {
 
 				if (approximation === 'average' && value !== UNDEFINED && value !== null) {
-					value /= count;
+					value = roundToDecimal(value / count, 4);
 				}
 
 				pointX = groupPositions.shift();
@@ -11829,7 +11839,7 @@ seriesProto.processData = function() {
 			// increase the counters
 			pointY = processedYData[i];
 			if (summarize && !ohlcData) { // approximation = 'sum' or 'average', the most frequent
-				value = value === UNDEFINED || value === null ? pointY : value + pointY;
+				value = roundToDecimal(value === UNDEFINED || value === null ? pointY : value + pointY, 4);
 			} else if (ohlcData) {
 				var index = series.cropStart + i,
 					point = (data && data[index]) || series.pointClass.prototype.applyOptions.apply({}, [dataOptions[index]]);
